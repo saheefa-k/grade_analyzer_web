@@ -1,0 +1,88 @@
+<div class="min-h-screen bg-base-200 px-4 py-12 sm:px-6">
+  <nav class="mb-8 flex flex-wrap gap-3 border-b border-base-300 pb-4">
+    <.link
+      href={~p"/"}
+      class="rounded-lg bg-primary px-4 py-2 font-bold text-primary-content shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+    >Home</.link>
+    <.link
+      href={~p"/students"}
+      class="rounded-lg px-4 py-2 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary hover:text-primary-content hover:shadow-md"
+    >All Students</.link>
+    <.link
+      href={~p"/class-analysis"}
+      class="rounded-lg px-4 py-2 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary hover:text-primary-content hover:shadow-md"
+    >Class Analysis</.link>
+  </nav>
+
+  <div class="w-full">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold tracking-tight text-base-content">Class Analysis</h1>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="stat rounded-xl border border-base-300 bg-base-100 shadow">
+        <div class="stat-title">Total Students</div>
+
+        <div class="stat-value">{Map.get(@analysis, :total_students, 6)}</div>
+      </div>
+
+      <div class="stat rounded-xl border border-base-300 bg-base-100 shadow">
+        <div class="stat-title">Average Marks</div>
+
+        <div class="stat-value">{Float.round(@analysis.average * 1.0, 2)}</div>
+      </div>
+
+      <div class="stat rounded-xl border border-base-300 bg-base-100 shadow">
+        <div class="stat-title">Passed</div>
+
+        <div class="stat-value text-success">{@analysis.passed}</div>
+      </div>
+
+      <div class="stat rounded-xl border border-base-300 bg-base-100 shadow">
+        <div class="stat-title">Failed</div>
+
+        <div class="stat-value text-error">{@analysis.failed}</div>
+      </div>
+    </div>
+
+    <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="rounded-xl border border-base-300 bg-base-100 p-5 shadow">
+        <h2 class="mb-2 text-xl font-semibold">Highest Scorer</h2>
+
+        <%= if @analysis.highest do %>
+          <p class="text-lg">{@analysis.highest.name}</p>
+
+          <p class="text-base-content/70">{@analysis.highest.marks} marks</p>
+        <% else %>
+          <p>No students available</p>
+        <% end %>
+      </div>
+
+      <div class="rounded-xl border border-base-300 bg-base-100 p-5 shadow">
+        <h2 class="mb-2 text-xl font-semibold">Lowest Scorer</h2>
+
+        <%= if @analysis.lowest do %>
+          <p class="text-lg">{@analysis.lowest.name}</p>
+
+          <p class="text-base-content/70">{@analysis.lowest.marks} marks</p>
+        <% else %>
+          <p>No students available</p>
+        <% end %>
+      </div>
+    </div>
+
+    <h2 class="mb-4 mt-8 text-2xl font-bold">Grade Distribution</h2>
+
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <%= for grade <- [:A, :B, :C, :D, :F] do %>
+        <div class="rounded-xl border border-base-300 bg-base-100 p-4 shadow">
+          <p class="text-sm text-base-content/70">Grade {grade}</p>
+
+          <p class="mt-2 text-3xl font-bold">{Map.get(@analysis.grade_distribution, grade, 0)}</p>
+
+          <p class="text-xs text-base-content/60">students</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

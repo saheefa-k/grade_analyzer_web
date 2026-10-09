@@ -1,0 +1,243 @@
+<div class="min-h-screen bg-base-200 px-4 py-12 sm:px-6">
+  <nav class="mb-8 flex flex-wrap gap-3 border-b border-base-300 pb-4">
+    <.link
+      href={~p"/"}
+      class="rounded-lg bg-primary px-4 py-2 font-bold text-primary-content shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+    >Home</.link>
+    <.link
+      href={~p"/students"}
+      class="rounded-lg px-4 py-2 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary hover:text-primary-content hover:shadow-md"
+    >All Students</.link>
+    <.link
+      href={~p"/class-analysis"}
+      class="rounded-lg px-4 py-2 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary hover:text-primary-content hover:shadow-md"
+    >Class Analysis</.link>
+  </nav>
+
+  <div class="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="card border border-base-300 bg-base-100 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
+      <div class="card-body">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-base-content/70">Total Students</p>
+          <span class="text-2xl">👨‍🎓</span>
+        </div>
+        <p class="text-4xl font-bold text-primary">{@analysis.total_students}</p>
+        <p class="text-sm text-base-content/60">Registered students</p>
+      </div>
+    </div>
+
+    <div class="card border border-base-300 bg-base-100 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
+      <div class="card-body">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-base-content/70">Class Average</p>
+          <span class="text-2xl">📊</span>
+        </div>
+        <p class="text-4xl font-bold text-info">{Float.round(@analysis.average, 2)}%</p>
+        <p class="text-sm text-base-content/60">Average student percentage</p>
+      </div>
+    </div>
+
+    <div class="card border border-base-300 bg-base-100 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
+      <div class="card-body">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-base-content/70">Passed</p>
+          <span class="text-2xl">✅</span>
+        </div>
+        <p class="text-4xl font-bold text-success">{@analysis.passed}</p>
+        <p class="text-sm text-base-content/60">Marks of 50% or above</p>
+      </div>
+    </div>
+
+    <div class="card border border-base-300 bg-base-100 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
+      <div class="card-body">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-base-content/70">Failed</p>
+          <span class="text-2xl">📉</span>
+        </div>
+        <p class="text-4xl font-bold text-error">{@analysis.failed}</p>
+        <p class="text-sm text-base-content/60">Below 50%</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-8 rounded-xl border border-base-300 bg-base-100 p-6 shadow-lg">
+    <h2 class="mb-6 text-xl font-bold">Grade Distribution</h2>
+    <div class="space-y-5">
+      <%= for {grade, label, color} <- [{:A, "A", "bg-success"}, {:B, "B", "bg-info"}, {:C, "C", "bg-primary"}, {:D, "D", "bg-warning"}, {:F, "F", "bg-error"}] do %>
+        <div class="flex items-center gap-4">
+          <span class="w-6 font-bold">{label}</span>
+          <div class="h-5 flex-1 overflow-hidden rounded-full bg-base-200">
+            <div
+              class={"h-full rounded-full #{color} transition-all duration-500"}
+              style={"width: #{Map.fetch!(@analysis.grade_distribution, grade) / @analysis.grade_chart_max * 100}%"}
+            >
+            </div>
+          </div>
+          <span class="w-8 text-right font-semibold">{Map.fetch!(
+            @analysis.grade_distribution,
+            grade
+          )}</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mb-8 rounded-xl border border-base-300 bg-base-100 p-6 shadow-lg">
+    <h2 class="mb-6 text-xl font-bold">Top 3 Performers</h2>
+    <%= if @analysis.top_performers == [] do %>
+      <p class="text-base-content/60">No student records available yet.</p>
+    <% else %>
+      <div class="space-y-4">
+        <%= for {student, index} <- Enum.with_index(@analysis.top_performers, 1) do %>
+          <div class="flex items-center justify-between gap-4 rounded-lg bg-base-200 p-4 transition-all duration-200 hover:shadow-md">
+            <div class="flex items-center gap-3">
+              <span class="flex size-10 items-center justify-center rounded-full bg-primary font-bold text-primary-content">{index}</span>
+              <div>
+                <p class="font-semibold">{student.name}</p>
+                <p class="text-sm text-base-content/60">Grade {Atom.to_string(student.grade)}</p>
+              </div>
+            </div>
+            <p class="text-xl font-bold text-primary">{Float.round(student.marks, 2)}%</p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mb-8 rounded-xl border border-base-300 bg-base-100 p-6 shadow-lg">
+    <div class="mb-4 flex items-center justify-between gap-4">
+      <h2 class="text-xl font-bold">Class Pass Rate</h2>
+      <span class="text-2xl font-bold text-success">{@analysis.pass_rate}%</span>
+    </div>
+    <div class="h-4 overflow-hidden rounded-full bg-base-200">
+      <div
+        class="h-full rounded-full bg-success transition-all duration-500"
+        style={"width: #{@analysis.pass_rate}%"}
+      >
+      </div>
+    </div>
+    <p class="mt-3 text-sm text-base-content/70">
+      {@analysis.passed} passed out of {@analysis.total_students} students
+    </p>
+  </div>
+
+  <div class="w-full">
+    <div class="mb-8">
+      <div class="mb-4 inline-flex rounded-2xl bg-primary p-4 text-primary-content">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="36"
+          height="36"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z" />
+          <path d="m9 9 2 2 4-4" />
+        </svg>
+      </div>
+      <h1 class="text-4xl font-bold tracking-tight text-base-content">Grade Analyzer</h1>
+    </div>
+
+    <div class="card w-full border border-base-300 bg-base-100 shadow-xl">
+      <div class="card-body p-6 sm:p-8">
+        <h2 class="card-title mb-1 text-2xl">Student Assessment</h2>
+
+        <.form for={%{}} action={~p"/analyze"} method="post">
+          <div>
+            <label for="student_name" class="label">
+              <span class="label-text font-semibold">Student Name</span>
+            </label>
+            <input
+              id="student_name"
+              name="student_name"
+              type="text"
+              placeholder="Enter student's full name"
+              class="input input-bordered w-full"
+              required
+            />
+          </div>
+
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div>
+              <label for="marks_obtained" class="label">
+                <span class="label-text font-semibold">Marks Obtained</span>
+              </label>
+              <input
+                id="marks_obtained"
+                name="marks_obtained"
+                type="number"
+                min="0"
+                step="any"
+                placeholder=" "
+                class="input input-bordered w-full"
+                required
+              />
+            </div>
+            <div>
+              <label for="total_marks" class="label">
+                <span class="label-text font-semibold">Total Marks</span>
+              </label>
+              <input
+                id="total_marks"
+                name="total_marks"
+                type="number"
+                min="0.01"
+                step="any"
+                placeholder=" "
+                class="input input-bordered w-full"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-base-300 bg-base-200/60 p-4">
+            <p class="text-sm font-medium text-base-content">Grade scale</p>
+            <div class="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+              <div><span class="font-bold text-success">A</span> — 90–100%</div>
+              <div><span class="font-bold text-primary">B</span> — 80–89%</div>
+              <div><span class="font-bold text-info">C</span> — 70–79%</div>
+              <div><span class="font-bold text-warning">D</span> — 60–69%</div>
+              <div><span class="font-bold text-error">F</span> — Below 60%</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full">Calculate Grade</button>
+        </.form>
+
+        <%= if @error do %>
+          <div class="alert alert-error mt-6">
+            <span>{@error}</span>
+          </div>
+        <% end %>
+
+        <%= if @result do %>
+          <div class="card mt-6 border border-base-300 bg-base-100 shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title">Grade Result</h2>
+              <p>Student Name: <strong>{@result.student_name}</strong></p>
+              <p>Percentage: <strong>{@result.percentage}%</strong></p>
+              <p>Grade: <span class="badge badge-primary badge-lg">{@result.grade}</span></p>
+              <p>
+                Status:
+                <%= if @result.percentage >= 50 do %>
+                  <span class="badge badge-success">Passed</span>
+                <% else %>
+                  <span class="badge badge-error">Failed</span>
+                <% end %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <p class="mt-6 text-center text-sm text-base-content/60">
+      Grade Analyzer · Student Performance Tool
+    </p>
+  </div>
+</div>
